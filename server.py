@@ -10,6 +10,9 @@ PORT = 8000
 image_path = os.path.expanduser('~/Desktop/spongebob.jpeg')
 csv_path = os.path.expanduser('~/Desktop/GPS_Data.csv')
 
+gps_polling_active = False
+stop_gps_polling = False
+
 class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/image':
@@ -17,7 +20,16 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif self.path == '/csv':
             self.serve_file(csv_path, 'text/csv')
         elif self.path == '/gps-poll':
-            self.serve_gps_poll()
+            if not gps_polling_active:
+                gps_polling_active = True
+                self.serve_gps_poll()
+            else:
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write(b"GPS polling is already active.")
+        elif self.path == '/gps-stop':
+            self.stop_gps_polling()
         else:
             self.serve_not_found()
 
@@ -38,6 +50,8 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(b"Resource not found.")
 
     def serve_gps_poll(self):
+        global stop_gps_polling
+        stop_gps_polling = False
         thread = threading.Thread(target=self.poll_gps)
         thread.start()
         self.send_response(200)
@@ -45,7 +59,17 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b"GPS polling started...")
 
+    def stop_gps_polling(self):
+        global stop_gps_polling, gps_polling_active
+        stop_gps_polling = True
+        gps_polling_active = False
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"GPS polling stopped.")
+    
     def poll_gps(self):
+        global stop_gps_polling
         gpsd.connect()
 
         # Check if the file exists and if not, write the header
@@ -57,7 +81,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             if not file_exists:
                 writer.writerow(["Latitude", "Longitude", "Time"])
 
-            while True:
+            while not stop_gps_polling:
                 try:
                     packet = gpsd.get_current()
                     if packet.mode >= 2:

@@ -9,6 +9,8 @@ counter_url = f'{base_url}/counter'  # For counter requests
 image_url = f'{base_url}/image'
 csv_url = f'{base_url}/csv'
 gps_poll_url = f'{base_url}/gps-poll'  # For GPS polling
+gps_stop_url = f'{base_url}/gps-stop'
+
 
 desktop_path = os.path.expanduser('~/Desktop')
 image_path = os.path.join(desktop_path, 'downloaded_image.jpg')
@@ -52,11 +54,14 @@ def request_gps_poll():
     except Exception as e:
         print(f"Error starting GPS polling: {e}")
 
+def stop_gps_polling():
+    try:
+        response = requests.get(gps_stop_url)
+        print("GPS polling stopped.")
+    except Exception as e:
+        print(f"Error stopping GPS polling: {e}")
+
 def main():
-    # Request counter a few times
-    for _ in range(3):
-        request_counter()
-        time.sleep(1)
 
     # Start GPS polling
     request_gps_poll()
@@ -66,13 +71,14 @@ def main():
     request_image()
     time.sleep(1)
 
-    # Request counter a few more times
-    for _ in range(2):
-        request_counter()
-        time.sleep(1)
 
     # Request CSV file
     request_csv()
+
+
+    time.sleep(10)
+
+    stop_gps_polling()
 
 if __name__ == "__main__":
     main()
