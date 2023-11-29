@@ -10,11 +10,13 @@ PORT = 8000
 image_path = os.path.expanduser('~/Desktop/spongebob.jpeg')
 csv_path = os.path.expanduser('~/Desktop/GPS_Data.csv')
 
-global gps_polling_active = False
-global stop_gps_polling = False
+gps_polling_active = False
+stop_gps_polling = False
 
 class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
+        global gps_polling_active
+
         if self.path == '/image':
             self.serve_file(image_path, 'image/jpeg')
         elif self.path == '/csv':
