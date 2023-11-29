@@ -1,35 +1,24 @@
 import http.server
 import socketserver
+import os
 
 PORT = 8000
+image_path = os.path.expanduser('~/Desktop/spongebob.jpeg')
 
-class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/image':
-            self.serve_image()
-        else:
-            self.serve_counter()
-
-    def serve_counter(self):
-        global counter
-        counter += 1  # Increment the counter with each request
-        message = f"Request number: {counter}"
-
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        self.wfile.write(message.encode())
-
-    def serve_image(self):
-        try:
-            with open("path/to/your/image.jpg", "rb") as file:  # Replace with your image path
-                self.send_response(200)
-                self.send_header('Content-type', 'image/jpeg')
-                self.end_headers()
+            self.send_response(200)
+            self.send_header('Content-type', 'image/jpeg')
+            self.end_headers()
+            with open(image_path, 'rb') as file:
                 self.wfile.write(file.read())
-        except FileNotFoundError:
-            self.send_error(404, "File Not Found")
+        else:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(b"Resource not found.")
 
-with socketserver.TCPServer(("", PORT), SimpleHTTPRequestHandler) as httpd:
+with socketserver.TCPServer(("", PORT), CustomHTTPRequestHandler) as httpd:
     print(f"Server started at localhost:{PORT}")
     httpd.serve_forever()
