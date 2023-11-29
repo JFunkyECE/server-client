@@ -5,6 +5,7 @@ import time
 raspberry_pi_ip = '10.0.0.49'  # Raspberry Pi's IP address
 port = 8000
 base_url = f'http://{raspberry_pi_ip}:{port}'
+counter_url = f'{base_url}/counter'  # Updated for counter requests
 image_url = f'{base_url}/image'
 csv_url = f'{base_url}/csv'
 
@@ -14,7 +15,7 @@ csv_path = os.path.join(desktop_path, 'downloaded_file.csv')
 
 def request_counter():
     try:
-        response = requests.get(base_url)
+        response = requests.get(counter_url)
         print(f"Counter response: {response.text}")
     except Exception as e:
         print(f"Error requesting counter: {e}")
