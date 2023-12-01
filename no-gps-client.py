@@ -16,11 +16,11 @@ gps_stop_url = f'{base_url}/gps-stop'
 
 cv_url = f'{base_url}/computer-vision'
 
-desktop_path = os.path.expanduser('~/Desktop')
+desktop_path = os.path.expanduser('~/Desktop/demo-files')
 pre_image_path = os.path.join(desktop_path, 'pre-processed-image.jpeg')
 post_image_path = os.path.join(desktop_path, 'post-processed-image.jpeg')
 
-csv_path = os.path.join(desktop_path, 'downloaded_file.csv')
+csv_path = os.path.join(desktop_path, 'GPS_Data.csv')
 
 def request_computer_vision():
     try:
@@ -91,21 +91,17 @@ def stop_gps_polling():
         print(f"Error stopping GPS polling: {e}")
 
 def main():
-    request_gps_poll()
     request_take_picture()
-
     time.sleep(2)
-
+    request_gps_poll()
     # Request image
-    request_pre_image()
-    time.sleep(1)
-
+    request_pre_image()    
     request_computer_vision()
+    time.sleep(2)
     request_post_image()
 
     # Request CSV file
     request_csv()
-
 
     time.sleep(10)
     stop_gps_polling()
