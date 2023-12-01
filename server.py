@@ -5,7 +5,7 @@ import threading
 import gpsd
 import time
 import csv
-import cv2 as cv
+#import cv2 as cv
 from picamera2 import Picamera2
 
 PORT = 8000
