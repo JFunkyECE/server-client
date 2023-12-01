@@ -6,6 +6,7 @@ import time
 import csv
 import cv2 as cv
 from picamera2 import Picamera2, Preview
+import glob
 
 PORT = 8000
 pre_image_path = os.path.expanduser('~/Desktop/server-client/pre-processed-image.jpeg')
@@ -36,6 +37,10 @@ model.setInputSwapRB(True)
 #make list of class labels from dataset (only used when drawing box titles)
 with open(modelClassList, 'rt') as spt:
     classLabels = spt.read().rstrip('\n').split('\n')
+    
+temp_base_dir = '/sys/bus/w1/devices/'
+device_folder = glob.glob(temp_base_dir + '28*')[0]
+device_file = device_folder + '/w1_slave'
 
 class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -58,6 +63,8 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.computer_vision()
             #call function to run model on image
             #create image in directory called post-processed-image.jpeg
+        elif self.path == '/temp':
+            self.read_temp()
         else:
             self.serve_not_found()
 
@@ -120,6 +127,30 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         self.wfile.write(b"Computer Vision finished")
+        
+    def read_temp_raw(self):
+        f = open(device_file, 'r')
+        Lines = f.readlines()
+        f.close()
+        return Lines
+        
+    def read_temp(self):
+        lines = self.read_temp_raw()
+        while lines[0].strip()[-3:] != 'YES':
+            time.sleep(0.2)
+            lines = self.read_temp_raw()
+        equals_pos = lines[1].find('t=')
+        if equals_pos != -1:
+            temp_string = lines[1][equals_pos+2:]
+            temp_c = float(temp_string) / 1000.0
+            #temp_c = 22.3
+        self.send_response(200) 
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        out = "T = " + str(temp_c) + " degrees"
+        self.wfile.write(out.encode('utf-8'))
+        
+
         
 
 with socketserver.TCPServer(("", PORT), CustomHTTPRequestHandler) as httpd:

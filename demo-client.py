@@ -13,14 +13,24 @@ csv_url = f'{base_url}/csv'
 take_picture_url = f'{base_url}/take-picture'
 gps_poll_url = f'{base_url}/gps-poll'  # For GPS polling
 gps_stop_url = f'{base_url}/gps-stop'
-
 cv_url = f'{base_url}/computer-vision'
-
+temp_url = f'{base_url}/temp'
 desktop_path = os.path.expanduser('~/Desktop/demo-files')
 pre_image_path = os.path.join(desktop_path, 'pre-processed-image.jpeg')
 post_image_path = os.path.join(desktop_path, 'post-processed-image.jpeg')
 
 csv_path = os.path.join(desktop_path, 'GPS_Data.csv')
+
+def request_string_from_server():
+    try:
+        response = requests.get(temp_url)
+        if response.status_code == 200:
+            print(response.text)
+        else:
+            print("Failed to retrieve string")
+    except Exception as e:
+        print(f"Error retrieving string: {e}")
+
 
 def request_computer_vision():
     try:
@@ -98,7 +108,8 @@ def main():
         'computer_vision': request_computer_vision,
         'post_image': request_post_image,
         'csv': request_csv,
-        'stop_gps': stop_gps_polling
+        'stop_gps': stop_gps_polling,
+        'temp': request_string_from_server
     }
 
     while True:
