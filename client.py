@@ -2,7 +2,7 @@ import requests
 import os
 import time
 
-raspberry_pi_ip = '10.0.0.49'  # Raspberry Pi's IP address
+raspberry_pi_ip = '10.42.0.1'  # Raspberry Pi's IP address
 port = 8000
 base_url = f'http://{raspberry_pi_ip}:{port}'
 counter_url = f'{base_url}/counter'  # For counter requests
@@ -10,7 +10,7 @@ image_url = f'{base_url}/image'
 csv_url = f'{base_url}/csv'
 gps_poll_url = f'{base_url}/gps-poll'  # For GPS polling
 gps_stop_url = f'{base_url}/gps-stop'
-
+take_picture_url = f'{base_url}/take-picture'
 
 desktop_path = os.path.expanduser('~/Desktop')
 image_path = os.path.join(desktop_path, 'downloaded_image.jpg')
@@ -61,7 +61,18 @@ def stop_gps_polling():
     except Exception as e:
         print(f"Error stopping GPS polling: {e}")
 
+def request_take_picture():
+    try:
+        response = requests.get(take_picture_url)
+        print("Taking Photo")
+        if response.status_code == 200:
+            print("Photo taken success")
+    except Exception as e:
+        print(f"Error taking photo: {e}")
+
 def main():
+
+    request_take_picture()
 
     # Start GPS polling
     request_gps_poll()

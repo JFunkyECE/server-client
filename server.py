@@ -5,6 +5,8 @@ import threading
 import gpsd
 import time
 import csv
+import cv2 as cv
+from picamera2 import Picamera2
 
 PORT = 8000
 image_path = os.path.expanduser('~/Desktop/spongebob.jpeg')
@@ -12,6 +14,8 @@ csv_path = os.path.expanduser('~/Desktop/GPS_Data.csv')
 
 gps_polling_active = False
 stop_gps_polling = False
+
+picam2 = Picamera2()
 
 class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -34,7 +38,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif self.path == '/gps-stop':
             self.stop_gps_polling()
         elif self.path == '/take-picture':
-            #call function for taking photo on rpi
+            self.take_picture()
         elif self.path == '/computer-vision':
             #call function to run model on image
         else:
@@ -105,6 +109,14 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 except Exception as e:
                     print(f"Error in GPS polling: {e}")
                     break
+
+    def take_picture(self):
+        picam2.start()
+        picam2.capture_file("pre-processed-image.jpg")
+        self.send_response(200) 
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"Photo taken")
 
 with socketserver.TCPServer(("", PORT), CustomHTTPRequestHandler) as httpd:
     print(f"Server started at localhost:{PORT}")
