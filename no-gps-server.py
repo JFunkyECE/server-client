@@ -15,6 +15,10 @@ gps_polling_active = False
 stop_gps_polling = False
 
 picam2 = Picamera2()
+camera_config = picam2.create_preview_configuration()
+picam2.configure(camera_config)
+picam2.start_preview(Preview.NULL)
+picam2.start()
 
 class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -48,7 +52,6 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(b"Resource not found.")
 
     def take_picture(self):
-        picam2.start()
         picam2.capture_file("pre-processed-image.jpg")
         self.send_response(200) 
         self.send_header('Content-type', 'text/html')
