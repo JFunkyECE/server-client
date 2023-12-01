@@ -91,6 +91,10 @@ def stop_gps_polling():
         print(f"Error stopping GPS polling: {e}")
 
 def main():
+    #while True:
+        #take user input
+
+        #switch statements for each function
     request_take_picture()
     time.sleep(2)
     request_gps_poll()

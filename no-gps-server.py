@@ -27,7 +27,7 @@ picam2.start_preview(Preview.NULL)
 picam2.start()
 
 model = cv.dnn_DetectionModel(modelWeights, modelConfig)
-model_confidence_threshold = 0.65;
+model_confidence_threshold = 0.65
 model.setInputSize(320, 320)
 model.setInputScale(1.0/127.5)
 model.setInputMean((127.5, 127.5, 127.5))
