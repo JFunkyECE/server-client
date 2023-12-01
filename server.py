@@ -39,7 +39,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.stop_gps_polling()
         elif self.path == '/take-picture':
             self.take_picture()
-        elif self.path == '/computer-vision':
+        #elif self.path == '/computer-vision':
             #call function to run model on image
         else:
             self.serve_not_found()
