@@ -1,5 +1,6 @@
 import http.server
 import socketserver
+import gpsd
 import os
 import threading
 import time
@@ -93,9 +94,34 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     
     def poll_gps(self):
         global stop_gps_polling
-        while not stop_gps_polling:
-            print("Waiting for a valid GPS fix...")
-            time.sleep(1)
+        gpsd.connect()
+
+        # Check if the file exists and if not, write the header
+        file_exists = os.path.exists(csv_path)
+
+        with open(csv_path, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            
+            if not file_exists:
+                writer.writerow(["Latitude", "Longitude", "Time"])
+
+            while not stop_gps_polling:
+                try:
+                    packet = gpsd.get_current()
+                    if packet.mode >= 2:
+                        gps_time = packet.get_time(local_time=False)
+                        latitude = packet.lat
+                        longitude = packet.lon
+                        writer.writerow([latitude, longitude, gps_time])
+                        print(f"Written to CSV: Latitude: {latitude}, Longitude: {longitude}, Time: {gps_time}")
+                    else:
+                        print("Waiting for a valid GPS fix...")
+                    time.sleep(1)
+                except KeyError:
+                    continue
+                except Exception as e:
+                    print(f"Error in GPS polling: {e}")
+                    break
     
     def serve_gps_poll(self):
         global stop_gps_polling
